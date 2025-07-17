@@ -1,117 +1,115 @@
-# API de Vendas - Teste Técnico DeveloperStore
+# Projeto Sales API (Teste.Sale.Ambev)
 
 ## 🚀 Visão Geral
 
-Esta API é uma implementação completa de um sistema de vendas seguindo a arquitetura **DDD (Domain-Driven Design)** e o padrão **External Identities** para referência de entidades externas com denormalização dos seus dados descritivos.
-
-O projeto oferece um **CRUD completo para vendas**, respeitando regras de negócio específicas de descontos por quantidade e limitações, além de simular publicação de eventos via logging.
+Este projeto é uma API para gestão de vendas, focada em operações de criação e cancelamento de vendas e itens de venda, com uma arquitetura limpa, testes automatizados robustos e validação rigorosa.
 
 ---
 
-## 📚 Conceitos Aplicados
+## 🛠 Tecnologias e Frameworks Utilizados
 
-- **DDD (Domain-Driven Design):** Separação clara entre domínio, aplicação, infraestrutura e API.
-- O projeto utiliza DI para desacoplar componentes, facilitando manutenção, testes e escalabilidade.
-- Serviços como `ISaleService` e repositórios (`ISaleRepository`) são registrados no container de DI e consumidos via construtor.
-- Exemplo no `Program.cs`:
-  ```csharp
-  builder.Services.AddSingleton<ISaleRepository, InMemorySaleRepository>();
-  builder.Services.AddScoped<ISaleService, SaleService>();
-- **External Identities:** Uso de IDs externos (`customerId`, `branchId`, `productId`) com nomes e descrições denormalizadas para evitar dependências diretas entre domínios.
-- **Repositório em memória:** Implementação mock para persistência, facilitando testes e prototipação.
-- **Regra de negócio:** Aplicação automática de descontos com base na quantidade vendida.
-- **Eventos simulados:** Eventos de venda e item são logados, simulando publicação para message brokers.
-- **Swagger:** Documentação e testes via interface visual.
+- **.NET 8 (C#)**  
+  Plataforma principal para desenvolvimento backend, garantindo alta performance e modernidade.
 
+- **Entity Framework Core (InMemory Provider para testes)**  
+  ORM para persistência de dados, com banco em memória nos testes para isolamento e rapidez.
 
----
+- **xUnit**  
+  Framework de testes para .NET, para garantir qualidade e comportamento esperado do código.
 
-## 🛠 Tecnologias e Bibliotecas
+- **Moq**  
+  Biblioteca de mocking para simular dependências em testes unitários, permitindo focar no comportamento da unidade testada.
 
-- **.NET 8** (.NET SDK 8.0)
-- **C#**
-- **Swashbuckle.AspNetCore:** para documentação Swagger UI
-- **xUnit:** para testes unitários
-- **Microsoft.Extensions.Logging:** para logs e eventos simulados
+- **FluentAssertions**  
+  Framework para assertions fluentes nos testes, tornando os testes mais legíveis e expressivos.
+
+- **FluentValidation**  
+  Framework para validação de comandos (DTOs), assegurando regras de negócio antes do processamento.
 
 ---
 
-## 📂 Estrutura do Projeto
+## 📦 Estrutura do Projeto
 
-# Entidades e interfaces do domínio
-/Teste.Sales.Domain 
-# Serviços, DTOs, regras de negócio
-/Teste.Sales.Application 
-# Repositórios (in-memory e EF se desejar)
-/Teste.Sales.Infrastructure 
-# API web, controllers, configuração Swagger
-/Teste.Sales.Api 
-# Testes unitários e de integração
-/Teste.Sales.Tests 
+- **Domain (Entities + Repositories)**  
+  - `SaleEntity`, `SaleItemEntity` — entidades principais que representam vendas e itens.  
+  - Repositórios (interfaces e implementações) para abstrair acesso a dados.
 
+- **Application (Commands + Handlers + Validators)**  
+  - Comandos (ex: `CreateSaleCommand`, `CancelSaleItemCommand`) como DTOs para entrada de dados.  
+  - Handlers que processam a lógica de negócios, recebem comandos e interagem com repositórios.  
+  - Validadores para garantir integridade dos comandos via FluentValidation.
 
+- **Infrastructure**  
+  - Implementação do repositório usando EF Core para persistência.
 
----
-
-## 🚦 Regras de Negócio
-
-- **Descontos por quantidade:**
-  - 4 a 9 unidades do mesmo produto → 10% de desconto no item
-  - 10 a 20 unidades do mesmo produto → 20% de desconto no item
-- **Limite máximo:** máximo 20 unidades por produto em uma venda
-- **Sem desconto:** para compras abaixo de 4 unidades
-- **Cancelamento:** vendas e itens podem ser cancelados, com atualização no total
+- **Tests**  
+  - Testes unitários cobrindo:  
+    - Handlers (ex: criação e cancelamento de vendas/itens)  
+    - Validação dos comandos  
+    - Repositório em memória para simular acesso a dados.
 
 ---
 
-## 📖 Endpoints principais (exemplo com controller `SalesController`)
+## 💡 Principais Conceitos Aplicados
 
-| Método  | Endpoint                         | Descrição                      |
-|---------|---------------------------------|-------------------------------|
-| POST    | `/api/sales`                    | Criar nova venda              |
-| GET     | `/api/sales`                    | Listar todas as vendas        |
-| GET     | `/api/sales/{id}`               | Buscar venda por ID           |
-| PUT     | `/api/sales/{id}`               | Atualizar venda               |
-| PATCH   | `/api/sales/{id}/cancel`        | Cancelar venda                |
-| PATCH   | `/api/sales/{id}/items/{productId}/cancel` | Cancelar item específico |
+- **Clean Architecture / Arquitetura em Camadas**  
+  Separação clara entre domínio, aplicação, infraestrutura e apresentação para facilitar manutenção e evolução.
+
+- **CQRS (Command Query Responsibility Segregation)**  
+  Comandos para alterar estado (CreateSaleCommand, CancelSaleItemCommand), isolados da leitura.
+
+- **Validação Separada**  
+  Uso do FluentValidation para garantir que comandos estejam sempre consistentes antes de serem processados.
+
+- **Testes Automatizados**  
+  - **Unitários**: handlers, validação e repositórios.  
+  - Uso de mocks para isolar unidades e focar no comportamento esperado.  
+  - Testes específicos para casos de erro e sucesso.
+
+- **Mocking e Assertions Expressivas**  
+  Moq para simular dependências e FluentAssertions para testes mais legíveis.
+
+- **Entidades Imutáveis e Encapsulamento**  
+  Uso de propriedades com setters privados para garantir integridade dos dados dentro do domínio.
 
 ---
 
-## ⚙️ Como rodar a aplicação
+## 📚 Exemplos de Funcionalidades Testadas
 
-1. Clone o repositório:
+- Criação de venda com múltiplos itens, validando dados obrigatórios e regras (ex: quantidade maior que zero).  
+- Cancelamento de itens da venda, incluindo verificação se o item e a venda existem.  
+- Validação que não permite criar vendas sem itens ou com itens inválidos.
+
+---
+
+## ⚙️ Como Rodar os Testes
+
+1. Certifique-se que .NET 8 SDK está instalado.  
+2. No terminal, navegue até a pasta dos testes (`Teste.Sale.Ambev.Unit`).  
+3. Execute:  
    ```bash
-   git clone https://github.com/DevGiovaneJunior/teste-sales-api.git
-   cd teste-sales-api/src/Teste.Sales.Api
-Restaure os pacotes e rode o projeto:
+   dotnet test
 
-bash
-- dotnet restore
-- dotnet run
-
-- Teste os endpoints diretamente pelo Swagger UI.
-
-## 📦   DTO de exemplo para criar uma venda
-json
-```
+## Json para testar no SWAGGER
+ ```
 {
   "customerId": "1",
-  "customerName": "Giovane",
+  "customerName": "Cliente Teste",
   "branchId": "1",
-  "branchName": "Matriz São Paulo",
+  "branchName": "Matriz",
   "items": [
     {
       "productId": "1",
-      "productName": "Cerveja Brahma",
-      "quantity": 26,
-      "unitPrice": 6.50
+      "productName": "Coca Cola",
+      "quantity": 8,
+      "unitPrice": 7
     },
     {
       "productId": "2",
-      "productName": "Cerveja Skol",
-      "quantity": 8,
-      "unitPrice": 7.00
+      "productName": "Skol Latao",
+      "quantity": 13,
+      "unitPrice": 4.50
     }
   ]
 }
-```
+ ```
